@@ -1,11 +1,3 @@
-# samplepythonmodule
-
-Sample JeVois machine vision module written in Python
-
-
-
-
-
 ######################################################################################################################
 #
 # JeVois Smart Embedded Machine Vision Toolkit - Copyright (C) 2016 by Laurent Itti, the University of Southern
@@ -22,3 +14,29 @@ Sample JeVois machine vision module written in Python
 # Tel: +1 213 740 3527 - itti@pollux.usc.edu - http://iLab.usc.edu - http://jevois.org
 ######################################################################################################################
 
+INSTALLATION INSTRUCTIONS
+=========================
+
+To compile and install for host:
+--------------------------------
+
+./rebuild-host.sh
+
+
+To cross-compile for platform hardware and install to the jevois-sdk:
+---------------------------------------------------------------------
+
+./rebuild-platform.sh -DJEVOIS_MODULES_TO_BUILDROOT=ON
+
+The package will be included next time you flash a custom microSD card using jevois-build.sh in jevois-sdk.
+
+To cross-compile for platform hardware and install to jvpkg package:
+--------------------------------------------------------------------
+
+./rebuild-platform.sh
+cd pbuild
+make jvpkg
+cd ..
+
+Then just copy the resulting .jvpkg file to the JEVOIS:/packages/ folder on your microSD card. The JeVois smart camera
+will unpack and install it next time it starts up.
