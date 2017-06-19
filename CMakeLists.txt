@@ -40,3 +40,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # library for all shared components, and then each module gets this library as a target dependency:
 jevois_setup_modules(src/Modules "")
 
+# Wrapping up:
+jevois_project_finalize()  # call this last in your CMakeLists.txt, will un-mount the live microSD if applicable
