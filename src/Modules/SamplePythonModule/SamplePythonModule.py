@@ -32,13 +32,9 @@ class SamplePythonModule:
         self.timer = jevois.Timer("canny", 100, jevois.LOG_INFO)
 
     # ###################################################################################################
-    ## Process function with no USB output
-    def process(self, inframe):
-        jevois.LFATAL("process no usb not implemented")
-
-    # ###################################################################################################
-    ## Process function with USB output
-    def process(self, inframe, outframe):
+    ## Process function for all mappings both with and without USB video output
+    ## if the mapping specifies NONE as the video output, outframe will be None
+    def process(self, inframe, outframe = None):
         # Get the next camera image (may block until it is captured) and convert it to OpenCV BGR:
         img = inframe.getCvBGR()
 
@@ -50,23 +46,25 @@ class SamplePythonModule:
         # Start measuring image processing time (NOTE: does not account for input conversion time):
         self.timer.start()
 
-        # Draw a couple of things into the image:
-        # See http://docs.opencv.org/3.2.0/dc/da5/tutorial_py_drawing_functions.html for tutorial
-        # See http://docs.opencv.org/3.0-beta/modules/imgproc/doc/drawing_functions.html and
-        #     http://docs.opencv.org/3.2.0/d6/d6e/group__imgproc__draw.html for reference manual.
-        cv2.circle(img, (int(width/2), int(height/2)), 100, (255,0,0), 3) 
-
-        cv2.putText(img, "Hello JeVois - frame {}".format(self.frame), (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
+        # check if USB video output is enabled in the mapping
+        if outframe is not None:
+            # Draw a couple of things into the image:
+            # See http://docs.opencv.org/3.2.0/dc/da5/tutorial_py_drawing_functions.html for tutorial
+            # See http://docs.opencv.org/3.0-beta/modules/imgproc/doc/drawing_functions.html and
+            #     http://docs.opencv.org/3.2.0/d6/d6e/group__imgproc__draw.html for reference manual.
+            cv2.circle(img, (int(width/2), int(height/2)), 100, (255,0,0), 3)
+            cv2.putText(img, "Hello JeVois - frame {}".format(self.frame), (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
                     0.5, (0,0,255), 1, cv2.LINE_AA)
 
-        # Write frames/s info from our timer (NOTE: does not account for output conversion time):
-        fps = self.timer.stop()
-        cv2.putText(img, fps, (3, height - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1, cv2.LINE_AA)
+            # Write frames/s info from our timer (NOTE: does not account for output conversion time):
+            fps = self.timer.stop()
+            cv2.putText(img, fps, (3, height - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1, cv2.LINE_AA)
     
-        # Convert our BGR image to video output format and send to host over USB:
-        outframe.sendCvBGR(img)
-         
-        # Send a string over serial (e.g., to an Arduino). Remember to tell the JeVois Engine to display those messages,
+            # Convert our BGR image to video output format and send to host over USB:
+            outframe.sendCvBGR(img)
+
+        # Regardless of whether USB video is enabled via the mapping,
+        # send a string over serial (e.g., to an Arduino). Remember to tell the JeVois Engine to display those messages,
         # as they are turned off by default. For example: 'setpar serout All' in the JeVois console:
         jevois.sendSerial("DONE frame {}".format(self.frame));
         self.frame += 1
