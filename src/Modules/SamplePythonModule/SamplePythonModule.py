@@ -45,7 +45,8 @@ class SamplePythonModule:
         # Get image width, height, channels in pixels. Beware that if you change this module to get img as a grayscale
         # image, then you should change the line below to: "height, width = img.shape" otherwise numpy will throw. See
         # how it is done in the PythonOpenCv module of jevoisbase:
-        height, width, chans = img.shape
+        height = img.shape[0]
+        width = img.shape[1]
 
         # Start measuring image processing time (NOTE: does not account for input conversion time):
         self.timer.start()
@@ -63,8 +64,8 @@ class SamplePythonModule:
         fps = self.timer.stop()
         cv2.putText(img, fps, (3, height - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1, cv2.LINE_AA)
     
-        # Convert our BGR image to video output format and send to host over USB:
-        outframe.sendCvBGR(img)
+        # Convert our image to video output format and send to host over USB:
+        outframe.sendCv(img)
          
         # Send a string over serial (e.g., to an Arduino). Remember to tell the JeVois Engine to display those messages,
         # as they are turned off by default. For example: 'setpar serout All' in the JeVois console:
