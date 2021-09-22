@@ -23,7 +23,16 @@ cmake_minimum_required(VERSION 3.1)
 
 ## Set vendor names, our modules will be placed in a directory by that name under /jevois/modules:
 set(JEVOIS_VENDOR "SampleVendor")
-set(JEVOIS_CONFIG "/jevois/config" CACHE STRING "Path to JeVois config to use")
+if (JEVOIS_HARDWARE STREQUAL "PRO")
+  set(JEVOIS_CONFIG "/jevoispro/config" CACHE STRING "Path to JeVois config to use")
+else()
+  set(JEVOIS_CONFIG "/jevois/config" CACHE STRING "Path to JeVois config to use")
+endif()
+
+## Set a version for your module, used to create the .deb package for platform:
+set(MOD_VERSION_MAJOR 1)
+set(MOD_VERSION_MINOR 0)
+set(MOD_VERSION_PATCH 0)
 
 ## Include helper functions, config, etc from the JeVois install:
 set(CMAKE_MODULE_PATH ${JEVOIS_CONFIG})
@@ -44,7 +53,34 @@ jevois_setup_modules(src/Modules "")
 
 ## Install any shared resources (cascade classifiers, neural network weights, etc) in the share/ sub-directory:
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/share"
-  DESTINATION "${JEVOIS_INSTALL_ROOT}" COMPONENT bin)
+  DESTINATION "${JEVOIS_MODULES_ROOT}" COMPONENT bin)
+
+########################################################################################################################
+# Debian packaging:
+
+# To list the files created in a package, run: dpkg -c <package.deb>
+set(CPACK_PACKAGE_DESCRIPTION "JeVois SamplePythonModule")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "JeVois SamplePythonModule")
+set(CPACK_PACKAGE_CONTACT "Laurent Itti <jevois.org@gmail.com>")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER ${CPACK_PACKAGE_CONTACT})
+set(CPACK_DEBIAN_PACKAGE_SECTION "universe")
+set(CPACK_PACKAGE_VENDOR "SampleVendor")
+set(CPACK_PACKAGE_VERSION_MAJOR "${MOD_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${MOD_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${MOD_VERSION_PATCH}")
+set(JEVOIS_PACKAGE_RELEASE "1") # packager revision number
+
+if (JEVOIS_PLATFORM)
+  set(JEVOIS_DEPEND "${JEVOIS}-platform (>=${JEVOIS_VERSION_MAJOR}.${JEVOIS_VERSION_MINOR}.${JEVOIS_VERSION_PATCH})")
+else (JEVOIS_PLATFORM)
+  set(JEVOIS_DEPEND "${JEVOIS}-host (>=${JEVOIS_VERSION_MAJOR}.${JEVOIS_VERSION_MINOR}.${JEVOIS_VERSION_PATCH})")
+endif (JEVOIS_PLATFORM)
+
+# Add any other dependencies here for the package, separated by commas:
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "${JEVOIS_DEPEND}")
+
+# Use helper from JeVois.cmake for all other settings:
+jevois_setup_cpack(samplepythonmodule)
 
 ## Wrapping up:
 jevois_project_finalize()  # call this last in your CMakeLists.txt, will un-mount the live microSD if applicable

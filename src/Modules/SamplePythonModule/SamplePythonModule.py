@@ -1,4 +1,6 @@
-import libjevois as jevois
+import pyjevois
+if pyjevois.pro: import libjevoispro as jevois
+else: import libjevois as jevois
 import cv2
 import numpy as np
 
@@ -71,7 +73,33 @@ class SamplePythonModule:
         # as they are turned off by default. For example: 'setpar serout All' in the JeVois console:
         jevois.sendSerial("DONE frame {}".format(self.frame));
         self.frame += 1
+        
+    # ###################################################################################################
+    ## Process function with GUI output on JeVois-Pro
+    def processGUI(self, inframe, helper):
+        # Start a new display frame, gets its size and also whether mouse/keyboard are idle:
+        idle, winw, winh = helper.startFrame()
 
+        # Draw full-resolution input frame from camera:
+        x, y, w, h = helper.drawInputFrame("c", inframe, False, False)
+        
+        # Get the next camera image (may block until it is captured):
+        #inimg = inframe.getCvBGR()
+        
+        # Start measuring image processing time (NOTE: does not account for input conversion time):
+        self.timer.start()
+
+        # Some drawings:
+        helper.drawCircle(int(width/2), int(height/2), 100, 0xffffffff, True)
+        helper.drawRect(100, 100, 300, 200, 0xffffffff, True)
+        
+        # Write frames/s info from our timer:
+        fps = self.timer.stop()
+        helper.iinfo(inframe, fps, winw, winh);
+
+        # End of frame:
+        helper.endFrame()
+  
     # ###################################################################################################
     ## Parse a serial command forwarded to us by the JeVois Engine, return a string
     # This function is optional and only needed if you want your module to handle custom commands. Delete if not needed.
