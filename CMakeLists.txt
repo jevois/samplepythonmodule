@@ -52,8 +52,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 jevois_setup_modules(src/Modules "")
 
 ## Install any shared resources (cascade classifiers, neural network weights, etc) in the share/ sub-directory:
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/share"
-  DESTINATION "${JEVOIS_MODULES_ROOT}" COMPONENT bin)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/share-${JEVOIS}/"
+  DESTINATION "${JEVOIS_MODULES_ROOT}/share" COMPONENT bin)
 
 ########################################################################################################################
 # Debian packaging:
